@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AlgoViz - Sorting Algorithm Visualizer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- MathJax for LaTeX rendering -->
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <script>
+    // MathJax configuration (optional, but good for inline math)
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --accent: #4895ef;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --header-gradient: linear-gradient(135deg, #3a0ca3 0%, #4361ee 50%, #4cc9f0 100%);
+      --bar-color: var(--primary);
+      --compare-color: #f72585; /* Pink */
+      --swap-color: #fee440;    /* Yellow */
+      --sorted-color: #00b894;  /* Green */
+      --pivot-color: #9b59b6; /* Purple for pivot */
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f7ff;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    .header {
+      text-align: center;
+      padding: 2rem;
+      background: var(--header-gradient);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: white;
+      display: inline-block;
+    }
+    
+    .logo i {
+      margin-right: 10px;
+      color: #f72585;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .tagline {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+    
+    .hero {
+      padding: 3rem 2rem;
+      text-align: center;
+      background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+    }
+    
+    .hero h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--secondary);
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      color: var(--dark);
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.6);
+    }
+    
+    .features {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2.2rem;
+      color: var(--secondary);
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .feature-card {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 10px 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    
+    .feature-card h3 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+    
+    /* Visualization Page Styles */
+    .visualization-page {
+      display: none;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .visualization-page h2 {
+      font-size: 3rem;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      text-align: center;
+      animation: fadeIn 1s ease;
+    }
+    
+    .visualization-page p {
+      font-size: 1.3rem;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+      text-align: center;
+      animation: fadeIn 1.5s ease;
+    }
+    
+    .sort-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 3rem 0;
+    }
+    
+    .sort-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      text-align: center;
+      border-top: 4px solid var(--accent);
+    }
+    
+    .sort-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sort-card h3 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    
+    .sort-card p {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .learn-more {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .learn-more:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .back-button {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      margin-top: 2rem;
+    }
+    
+    .back-button:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    /* Algorithm Detail Page Styles */
+    .algorithm-page {
+      display: none;
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .algorithm-page h2 {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    /* Tab specific styles */
+    .tabs-container {
+      margin-top: 2rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+    }
+
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--light);
+      padding-bottom: 0.5rem;
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    }
+
+    .tab-button {
+      background: none;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark);
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      margin: 0 10px; /* Space between buttons */
+    }
+
+    .tab-button:hover {
+      color: var(--primary);
+      border-color: var(--accent);
+    }
+
+    .tab-button.active {
+      color: var(--primary);
+      border-color: var(--primary);
+      background-color: var(--light);
+      border-radius: 5px 5px 0 0;
+    }
+
+    .tab-content {
+      display: none; /* Hidden by default */
+      padding-top: 1rem;
+    }
+
+    .tab-content.active {
+      display: block; /* Shown when active */
+    }
+
+    /* Content within tabs */
+    .tab-content h3 { /* For sub-sections like Time Complexity, Example */
+        font-size: 1.3rem;
+        color: var(--primary);
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .pseudocode {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      margin: 2rem 0; /* Adjusted margin for video */
+    }
+    
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+    }
+    
+    .try-button {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+    
+    .try-button:hover {
+      background: var(--secondary);
+      transform: translateY(-2px);
+    }
+
+    /* Visualizer specific styles */
+    #visualizer-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    #visualizer-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        justify-content: center;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    #visualizer-controls button,
+    #visualizer-controls input[type="text"] { /* Removed input[type="range"] */
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid var(--primary); /* Added border for input */
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #visualizer-controls button {
+        background: var(--primary);
+        color: white;
+    }
+
+    #visualizer-controls button:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+    }
+
+    #visualizer-controls input[type="text"] {
+        flex-grow: 1; /* Allow text input to grow */
+        max-width: 300px; /* Limit max width */
+        min-width: 200px; /* Ensure minimum width */
+        border: 1px solid var(--accent);
+        padding: 10px 15px;
+        font-weight: normal;
+        color: var(--dark);
+    }
+
+    #sortingCanvas {
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: block;
+      margin-top: 20px;
+      width: 100%; /* Make canvas responsive */
+      height: 400px; /* Set a default height, aspect ratio controlled by JS */
+    }
+
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 2rem;
+      }
+      
+      .hero h2 {
+        font-size: 2rem;
+      }
+      
+      .visualization-page h2, .algorithm-page h2 {
+        font-size: 2.2rem;
+      }
+      
+      .visualization-page p {
+        font-size: 1.1rem;
+      }
+      
+      .sort-types {
+        grid-template-columns: 1fr;
+      }
+      .tab-buttons {
+        flex-direction: column; /* Stack buttons vertically on small screens */
+        align-items: center;
+      }
+      .tab-button {
+        margin: 5px 0;
+        width: 90%; /* Make buttons wider */
+      }
+      #visualizer-controls {
+          flex-direction: column;
+          align-items: center;
+      }
+      #visualizer-controls input[type="text"] {
+          width: 90%;
+          max-width: unset; /* Remove max-width on small screens */
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <i class="fas fa-sort-amount-down-alt"></i>AlgoViz
+    </div>
+    <div class="tagline">Visualize Algorithms Beautifully</div>
+  </header>
+
+  <section class="hero">
+    <h2>Sorting Algorithm Visualizer</h2>
+    <p>Understand how sorting algorithms work through interactive visualizations. See how different algorithms perform step-by-step with colorful animations.</p>
+    <a href="#" id="visualizer-button" class="cta-button">Try Visualizer Now</a>
+  </section>
+
+  <section class="features">
+    <h2 class="section-title">Why Choose AlgoViz?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-eye"></i>
+        </div>
+        <h3>Interactive Visualizations</h3>
+        <p>Watch algorithms come to life with colorful, step-by-step animations that make complex concepts easy to understand.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <h3>Multiple Algorithms</h3>
+        <p>Compare different sorting techniques including Bubble Sort, Merge Sort, Quick Sort and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <h3>Performance Comparison</h3>
+        <p>See how different algorithms perform with various data sets and understand their time complexities.</p>
+      </div>
+    </div>
+  </section>
+  
+  <section id="visualization-page" class="visualization-page">
+    <h2>What is Sort?</h2>
+    <p>Sorting is the process of arranging items systematically, typically in a particular order. In computer science, sorting refers to organizing data in a particular format according to a defined relationship.</p>
+    
+    <h2 style="margin-top: 3rem;">Types of Sorting Algorithms</h2>
+    <div class="sort-types">
+      <div class="sort-card">
+        <h3>Bubble Sort</h3>
+        <p>Repeatedly swaps adjacent elements if they are in the wrong order.</p>
+        <a href="#" class="learn-more" data-algo="bubble">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Selection Sort</h3>
+        <p>Selects the smallest element and swaps it to the front.</p>
+        <a href="#" class="learn-more" data-algo="selection">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Insertion Sort</h3>
+        <p>Builds the final sorted array one item at a time.</p>
+        <a href="#" class="learn-more" data-algo="insertion">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Merge Sort</h3>
+        <p>Divides the array into halves, sorts them, and merges them.</p>
+        <a href="#" class="learn-more" data-algo="merge">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Quick Sort</h3>
+        <p>Picks a pivot element and partitions the array around it.</p>
+        <a href="#" class="learn-more" data-algo="quick">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Heap Sort</h3>
+        <p>Uses a binary heap data structure to sort elements.</p>
+        <a href="#" class="learn-more" data-algo="heap">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Counting Sort</h3>
+        <p>Counts occurrences of each element to determine positions.</p>
+        <a href="#" class="learn-more" data-algo="counting">Learn More</a>
+      </div>
+      
+      <div class="sort-card">
+        <h3>Radix Sort</h3>
+        <p>Sorts numbers by processing individual digits.</p>
+        <a href="#" class="learn-more" data-algo="radix">Learn More</a>
+      </div>
+    </div>
+    
+    <div style="text-align: center;">
+      <a href="#" id="back-button" class="back-button">Back to Home</a>
+    </div>
+  </section>
+
+  <section id="algorithm-page" class="algorithm-page">
+    <h2 id="algo-title">Algorithm Name</h2>
+    
+    <div class="tabs-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="definition">Definition</button>
+            <button class="tab-button" data-tab="algorithm">Algorithm & Pseudocode</button>
+            <button class="tab-button" data-tab="video">YouTube Video</button>
+            <button class="tab-button" data-tab="try">Try This Algorithm</button>
+        </div>
+
+        <div id="definition-tab-content" class="tab-content active">
+            <h3>Definition</h3>
+            <p id="algo-definition"></p>
+            
+            <h3>Time Complexity:</h3>
+            <ul>
+              <li><b>Best Case:</b> <span id="algo-best-case"></span></li>
+              <li><b>Average Case:</b> <span id="algo-average-case"></span></li>
+              <li><b>Worst Case:</b> <span id="algo-worst-case"></span></li>
+            </ul>
+
+            <h3>Example:</h3>
+            <p id="algo-example"></p>
+        </div>
+        
+        <div id="algorithm-tab-content" class="tab-content">
+            <h3>Algorithm and Pseudocode</h3>
+            <div class="pseudocode" id="algo-pseudocode"></div>
+        </div>
+        
+        <div id="video-tab-content" class="tab-content">
+            <h3>Video Explanation</h3>
+            <div class="video-container" id="algo-video">
+              <!-- YouTube iframe will be inserted here -->
+            </div>
+        </div>
+        
+        <div id="try-tab-content" class="tab-content">
+            <h3>Try This Algorithm</h3>
+            <p id="try-algo-description">Visualize how this algorithm works with interactive examples.</p>
+            
+            <div id="visualizer-container">
+                <div id="visualizer-controls">
+                    <input type="text" id="array-input" placeholder="e.g., 50,10,80,30,60" maxlength="150">
+                    <button id="load-array-btn"><i class="fas fa-upload"></i> Load Array</button>
+                    <button id="next-step-btn"><i class="fas fa-arrow-right"></i> Next Step</button>
+                    <button id="reset-sort-btn"><i class="fas fa-redo"></i> Reset Sort</button>
+                </div>
+                <canvas id="sortingCanvas"></canvas>
+            </div>
+        </div>
+    </div> <!-- End tabs-container -->
+    
+    <div style="text-align: center; margin-top: 3rem;">
+      <a href="#" id="back-to-list" class="back-button">Back to Algorithms List</a>
+    </div>
+  </section>
+
+  <script>
+    // --- Algorithm Visualizer Logic ---
+
+    // Algorithm Data and Visualizer Step functions
+    const algorithms = {
+      bubble: {
+        name: "Bubble Sort",
+        definition: "Bubble Sort is a simple comparison-based algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. The pass through the list is repeated until the list is sorted. It gets its name because smaller elements 'bubble' to the top of the list.",
+        bestCase: "$O(n)$ (when array is already sorted)",
+        averageCase: "$O(n^2)$",
+        worstCase: "$O(n^2)$",
+        example: "Consider the array <strong>[5, 1, 4, 2, 8]</strong>.<br>" +
+                 "1. <strong>Pass 1:</strong> (5 1 4 2 8) &rarr; (1 5 4 2 8) &rarr; (1 4 5 2 8) &rarr; (1 4 2 5 8)<br>" +
+                 "2. <strong>Pass 2:</strong> (1 4 2 5 8) &rarr; (1 2 4 5 8)<br>" +
+                 "...and so on until sorted: <strong>[1, 2, 4, 5, 8]</strong>.",
+        pseudocode: `procedure bubbleSort(A : list of sortable items)
+    n := length(A)
+    repeat
+        swapped := false
+        for i := 1 to n-1 inclusive do
+            if A[i-1] > A[i] then
+                swap(A[i-1], A[i])
+                swapped = true
+            end if
+        end for
+        n := n - 1
+    until not swapped
+end procedure`,
+        videoId: "lyZQPjUT5B4",
+        visualizeStep: _bubbleSortNextStep
+      },
+      selection: {
+        name: "Selection Sort",
+        definition: "Selection Sort is an in-place comparison sorting algorithm that divides the input list into two parts: a sorted sublist of items which is built up from left to right and the remaining unsorted sublist. The algorithm repeatedly selects the smallest element from the unsorted sublist and swaps it with the leftmost unsorted element.",
+        bestCase: "$O(n^2)$",
+        averageCase: "$O(n^2)$",
+        worstCase: "$O(n^2)$",
+        example: "Consider the array <strong>[64, 25, 12, 22, 11]</strong>.<br>" +
+                 "1. Find the minimum element in [64, 25, 12, 22, 11] which is 11. Swap it with 64. Array becomes <strong>[11, 25, 12, 22, 64]</strong>.<br>" +
+                 "2. Find the minimum element in the remaining unsorted part [25, 12, 22, 64] which is 12. Swap it with 25. Array becomes <strong>[11, 12, 25, 22, 64]</strong>.<br>" +
+                 "3. Continue this process until the entire array is sorted: <strong>[11, 12, 22, 25, 64]</strong>.",
+        pseudocode: `procedure selectionSort(A : list of sortable items)
+    n := length(A)
+    for i := 0 to n-2 inclusive do
+        minIndex := i
+        for j := i+1 to n-1 inclusive do
+            if A[j] < A[minIndex] then
+                minIndex := j
+            end if
+        end for
+        if minIndex != i then
+            swap(A[i], A[minIndex])
+        end if
+    end for
+end procedure`,
+        videoId: "g-PGLbMth_g",
+        visualizeStep: _selectionSortNextStep
+      },
+      insertion: {
+        name: "Insertion Sort",
+        definition: "Insertion Sort is a simple sorting algorithm that builds the final sorted array one item at a time. It is much less efficient on large lists than more advanced algorithms. Insertion sort works similarly to how we sort playing cards in our hands - we take each new card and insert it into its proper position in the already sorted cards.",
+        bestCase: "$O(n)$ (when array is already sorted)",
+        averageCase: "$O(n^2)$",
+        worstCase: "$O(n^2)$",
+        example: "Consider the array <strong>[12, 11, 13, 5, 6]</strong>.<br>" +
+                 "1. Start with <strong>[12]</strong> (sorted part).<br>" +
+                 "2. Insert 11: <strong>[11, 12]</strong> (11 is inserted before 12).<br>" +
+                 "3. Insert 13: <strong>[11, 12, 13]</strong> (13 is already in its correct sorted position).<br>" +
+                 "4. Insert 5: <strong>[5, 11, 12, 13]</strong> (5 is inserted at the beginning).<br>" +
+                 "5. Insert 6: <strong>[5, 6, 11, 12, 13]</strong> (6 is inserted after 5).",
+        pseudocode: `procedure insertionSort(A : list of sortable items)
+    n := length(A)
+    for i := 1 to n-1 inclusive do
+        key := A[i]
+        j := i - 1
+        while j >= 0 and A[j] > key do
+            A[j+1] := A[j]
+            j := j - 1
+        end while
+        A[j+1] := key
+    end for
+end procedure`,
+        videoId: "OGzPmgsI-pQ",
+        visualizeStep: _insertionSortNextStep
+      },
+      merge: {
+        name: "Merge Sort",
+        definition: "Merge Sort is a divide-and-conquer algorithm that divides the input array into two halves, sorts them recursively, and then merges the two sorted halves. The merge operation is the key process that assumes that the two sub-arrays are sorted and merges them to produce a single sorted array.",
+        bestCase: "$O(n \log n)$",
+        averageCase: "$O(n \log n)$",
+        worstCase: "$O(n \log n)$",
+        example: "Consider the array <strong>[38, 27, 43, 3, 9, 82, 10]</strong>.<br>" +
+                 "1. <strong>Divide:</strong> Recursively split the array into halves until single-element arrays are formed.<br>" +
+                 "   Example splits: [38, 27, 43], [3, 9, 82, 10] &rarr; [38], [27], [43] and [3], [9], [82], [10]<br>" +
+                 "2. <strong>Conquer (Sort and Merge):</strong> Merge the sorted sub-arrays.<br>" +
+                 "   Example merge: Merge [27, 38, 43] with [3, 9, 10, 82] to get <strong>[3, 9, 10, 27, 38, 43, 82]</strong>.",
+        pseudocode: `procedure mergeSort(A : list of sortable items)
+    if length(A) <= 1 then
+        return A
+    end if
+    
+    middle := length(A) / 2
+    left := A[0..middle-1]
+    right := A[middle..length(A)-1]
+    
+    left := mergeSort(left)
+    right := mergeSort(right)
+    
+    return merge(left, right)
+end procedure
+
+procedure merge(left, right)
+    result := []
+    while length(left) > 0 and length(right) > 0 do
+        if first(left) <= first(right) then
+            append first(left) to result
+            left := rest(left)
+        else
+            append first(right) to result
+            right := rest(right)
+        end if
+    end while
+    
+    while length(left) > 0 do
+        append first(left) to result
+        left := rest(left)
+    end while
+    
+    while length(right) > 0 do
+        append first(right) to result
+        right := rest(right)
+    end while
+    
+    return result
+end procedure`,
+        videoId: "4VqmGXwpLqc",
+        visualizeStep: _mergeSortNextStep
+      },
+      quick: {
+        name: "Quick Sort",
+        definition: "Quick Sort is a divide-and-conquer algorithm that picks an element as pivot and partitions the array around the pivot point. It recursively applies this process to the sub-arrays. There are different versions that pick pivot in different ways (first element, last element, random element, or median).",
+        bestCase: "$O(n \log n)$ (when pivot divides array into two roughly equal halves)",
+        averageCase: "$O(n \log n)$",
+        worstCase: "$O(n^2)$ (when pivot is always the smallest or largest element)",
+        example: "Consider the array <strong>[10, 80, 30, 90, 40, 50, 70]</strong>.<br>" +
+                 "1. Choose a pivot. Let's pick the last element (<strong>70</strong>) as the pivot.<br>" +
+                 "2. <strong>Partition:</strong> Rearrange elements such that elements smaller than the pivot are on its left, and larger ones are on its right. Array becomes: <strong>[10, 30, 40, 50, 70, 80, 90]</strong>.<br>" +
+                 "3. <strong>Recursively sort:</strong> Apply Quick Sort to the sub-array of elements smaller than the pivot ([10, 30, 40, 50]) and the sub-array of elements larger than the pivot ([80, 90]).",
+        pseudocode: `procedure quickSort(A : list of sortable items, low, high)
+    if low < high then
+        p := partition(A, low, high)
+        quickSort(A, low, p - 1)
+        quickSort(A, p + 1, high)
+    end if
+end procedure
+
+procedure partition(A, low, high)
+    pivot := A[high]
+    i := low - 1
+    for j := low to high-1 inclusive do
+        if A[j] < pivot then
+            i := i + 1
+            swap(A[i], A[j])
+        end if
+    end for
+    swap(A[i+1], A[high])
+    return i + 1
+end procedure`,
+        videoId: "Hoixgm4-P4M",
+        visualizeStep: _quickSortNextStep
+      },
+      heap: {
+        name: "Heap Sort",
+        definition: "Heap Sort is a comparison-based sorting technique based on Binary Heap data structure. It is similar to selection sort where we first find the maximum element and place it at the end. We repeat the same process for remaining elements. A heap is a complete binary tree where items are stored in a special order.",
+        bestCase: "$O(n \log n)$",
+        averageCase: "$O(n \log n)$",
+        worstCase: "$O(n \log n)$",
+        example: "Consider the array <strong>[4, 10, 3, 5, 1]</strong>.<br>" +
+                 "1. <strong>Build Max-Heap:</strong> Transform the array into a max-heap. Largest element is at the root. Array becomes: <strong>[10, 5, 3, 4, 1]</strong>.<br>" +
+                 "2. <strong>Extract Max:</strong> Swap the root (largest element, 10) with the last element (1). Array is now <strong>[1, 5, 3, 4, 10]</strong>. Reduce heap size and heapify the remaining elements ([1, 5, 3, 4]). The heap becomes <strong>[5, 4, 3, 1]</strong>.<br>" +
+                 "3. Repeat step 2 until the heap is empty, resulting in a sorted array: <strong>[1, 3, 4, 5, 10]</strong>.",
+        pseudocode: `procedure heapSort(A : list of sortable items)
+    n := length(A)
+    
+    // Build max heap
+    for i := floor(n/2) - 1 downto 0 inclusive do
+        heapify(A, n, i)
+    end for
+    
+    // Extract elements from heap
+    for i := n-1 downto 1 inclusive do
+        swap(A[0], A[i])
+        heapify(A, i, 0)
+    end for
+end procedure
+
+procedure heapify(A, n, i)
+    largest := i
+    left := 2*i + 1
+    right := 2*i + 2
+    
+    if left < n and A[left] > A[largest] then
+        largest := left
+    end if
+    
+    if right < n and A[right] > A[largest] then
+        largest := right
+    end if
+    
+    if largest != i then
+        swap(A[i], A[largest])
+        heapify(A, n, largest)
+    end if
+end procedure`,
+        videoId: "MtQL_ll5KhQ",
+        visualizeStep: _heapSortNextStep
+      },
+      counting: {
+        name: "Counting Sort",
+        definition: "Counting Sort is an integer sorting algorithm that operates by counting the number of objects that have distinct key values. It uses arithmetic on those counts to determine the positions of each key value in the output sequence. It is not a comparison sort and runs in $O(n+k)$ time, making it faster than comparison-based algorithms for certain cases (where k is the range of input).",
+        bestCase: "$O(n+k)$",
+        averageCase: "$O(n+k)$",
+        worstCase: "$O(n+k)$",
+        example: "Consider the array <strong>[1, 4, 1, 2, 7, 5, 2]</strong> with maximum value k=7.<br>" +
+                 "1. <strong>Count Occurrences:</strong> Create a count array to store the count of each element.<br>" +
+                 "   `count[1]=2, count[2]=2, count[4]=1, count[5]=1, count[7]=1`. Other counts are 0.<br>" +
+                 "2. <strong>Cumulative Sum:</strong> Modify the count array so each element stores the sum of previous counts and itself. This gives the position of elements in the output.<br>" +
+                 "   `count[0]=0, count[1]=2, count[2]=4, count[3]=4, count[4]=5, count[5]=6, count[6]=6, count[7]=7`.<br>" +
+                 "3. <strong>Build Output Array:</strong> Iterate from right to left through the original array. Place elements into the output array based on their cumulative counts, then decrement the count.<br>" +
+                 "   Result: <strong>[1, 1, 2, 2, 4, 5, 7]</strong>.",
+        pseudocode: `procedure countingSort(A : list of integers, k : maximum value)
+    n := length(A)
+    count := array of size k+1, initialized to 0
+    output := array of size n
+    
+    // Store count of each element
+    for i := 0 to n-1 inclusive do
+        count[A[i]] := count[A[i]] + 1
+    end for
+    
+    // Change count[i] to contain position of i in output
+    for i := 1 to k inclusive do
+        count[i] := count[i] + count[i-1]
+    end for
+    
+    // Build output array
+    for i := n-1 downto 0 inclusive do
+        output[count[A[i]] - 1] := A[i]
+        count[A[i]] := count[A[i]] - 1
+    end for
+    
+    return output
+end procedure`,
+        videoId: "OKd534EWcdk",
+        visualizeStep: _countingSortNextStep
+      },
+      radix: {
+        name: "Radix Sort",
+        definition: "Radix Sort is a non-comparative integer sorting algorithm that sorts data with integer keys by grouping keys by the individual digits which share the same significant position and value. It processes each digit from least significant to most significant. Radix sort can be applied to data that can be sorted lexicographically, such as integers and strings.",
+        bestCase: "$O(nk)$ (where k is number of digits)",
+        averageCase: "$O(nk)$",
+        worstCase: "$O(nk)$",
+        example: "Consider the array <strong>[170, 45, 75, 90, 802, 24, 2, 66]</strong>.<br>" +
+                 "1. <strong>Sort by Units Digit (LSD):</strong> Apply a stable sort (like Counting Sort) based on the units digit.<br>" +
+                 "   Array after sort: <strong>[170, 90, 802, 2, 24, 45, 75, 66]</strong>.<br>" +
+                 "2. <strong>Sort by Tens Digit:</strong> Apply a stable sort based on the tens digit.<br>" +
+                 "   Array after sort: <strong>[802, 2, 24, 45, 66, 75, 90, 170]</strong>.<br>" +
+                 "3. <strong>Sort by Hundreds Digit:</strong> Apply a stable sort based on the hundreds digit.<br>" +
+                 "   Final Sorted Array: <strong>[2, 24, 45, 66, 75, 90, 170, 802]</strong>.",
+        pseudocode: `procedure radixSort(A : list of integers)
+    max := get maximum element in A
+    exp := 1
+    
+    while max / exp > 0 do
+        countingSortByDigit(A, exp)
+        exp := exp * 10
+    end while
+end procedure
+
+procedure countingSortByDigit(A, exp)
+    n := length(A)
+    output := array of size n
+    count := array of size 10, initialized to 0
+    
+    for i := 0 to n-1 inclusive do
+        digit := (A[i] / exp) % 10
+        count[digit] := count[digit] + 1
+    end for
+    
+    for i := 1 to 9 inclusive do
+        count[i] := count[i] + count[i-1]
+    end for
+    
+    for i := n-1 downto 0 inclusive do
+        digit := (A[i] / exp) % 10
+        output[count[digit] - 1] := A[i]
+        count[digit] := count[digit] - 1
+    end for
+    
+    for i := 0 to n-1 inclusive do
+        A[i] := output[i]
+    end for
+end procedure`,
+        videoId: "nu4gDuFabIM",
+        visualizeStep: _radixSortNextStep
+      }
+    };
+
+    // --- Global Visualizer Variables ---
+    let arr = []; // Array to be sorted
+    const MAX_ARRAY_SIZE = 100; // Max elements for user input and random generation
+    const MIN_ARRAY_SIZE = 2; // Min elements for user input
+    let canvas = null; // Initialize canvas to null
+    let ctx = null;    // Initialize context to null
+    let currentAlgorithm = null; // Stores the key of the currently selected algorithm (e.g., 'bubble')
+    let currentAlgoState = {}; // Stores the step-by-step state for the active algorithm
+
+    // --- Canvas Drawing Functions ---
+    // Function to draw bars on the canvas with appropriate highlighting
+    function drawBars(highlighted = [], swapped = [], sortedIndices = new Set(), pivotIndex = -1) {
+      if (!ctx || !canvas) { 
+          console.error("Canvas or context not initialized for drawing.");
+          return;
+      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+      const barWidth = canvas.width / arr.length;
+      const maxHeight = canvas.height;
+      const maxVal = Math.max(...arr); // Recalculate maxVal in case array changed during sort
+
+      for (let i = 0; i < arr.length; i++) {
+        const normalizedValue = Math.max(1, arr[i]); // Ensure min height for visibility
+        const barHeight = (normalizedValue / maxVal) * maxHeight; 
+        const x = i * barWidth;
+        const y = maxHeight - barHeight;
+
+        let barColor = getComputedStyle(document.documentElement).getPropertyValue('--bar-color').trim();
+
+        // Apply colors based on priority: sorted > pivot > swap > compare > default
+        if (sortedIndices.has(i)) { // Highest priority: element is sorted
+            barColor = getComputedStyle(document.documentElement).getPropertyValue('--sorted-color').trim();
+        } else if (i === pivotIndex) { // Second highest: element is the pivot
+            barColor = getComputedStyle(document.documentElement).getPropertyValue('--pivot-color').trim();
+        } else if (swapped.includes(i)) { // Third: element is involved in a swap
+            barColor = getComputedStyle(document.documentElement).getPropertyValue('--swap-color').trim();
+        } else if (highlighted.includes(i)) { // Fourth: element is being compared
+            barColor = getComputedStyle(document.documentElement).getPropertyValue('--compare-color').trim();
+        }
+        
+        ctx.fillStyle = barColor;
+        ctx.fillRect(x, y, barWidth, barHeight);
+        ctx.strokeStyle = '#333'; // Border for bars
+        ctx.strokeRect(x, y, barWidth, barHeight);
+
+        // --- Draw the number on top of the bar ---
+        const fontSize = Math.max(10, Math.min(18, barWidth / 2.5)); // Adjusted min font size and multiplier
+        ctx.font = `${fontSize}px 'Segoe UI', Arial`; // Use a sans-serif font
+        ctx.textAlign = 'center';
+
+        // Determine text color and position based on bar height
+        const textPadding = 3; // Small padding above or below text inside bar
+        let textY;
+        let textColor;
+        let strokeColor = 'rgba(0,0,0,0.5)'; // Dark stroke for white text
+        let strokeWidth = 0.5;
+
+        // If bar is tall enough, draw text inside the bar, white for contrast
+        if (barHeight > fontSize + textPadding * 2) {
+            textY = y + fontSize + textPadding; // Position just inside top of bar
+            textColor = 'white';
+            strokeColor = 'rgba(0,0,0,0.6)'; // Stronger stroke for white text
+            strokeWidth = 1;
+            ctx.textBaseline = 'top'; // Align text top to this Y coordinate
+        } else {
+            // If bar is too short, draw text above the bar, black for contrast with background
+            textY = y - textPadding;
+            textColor = 'black';
+            strokeColor = 'white'; // White stroke for black text (on light background)
+            strokeWidth = 1;
+            ctx.textBaseline = 'bottom'; // Align text bottom to this Y coordinate
+        }
+
+        ctx.fillStyle = textColor;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+
+        // Draw text and its stroke
+        ctx.strokeText(arr[i], x + barWidth / 2, textY);
+        ctx.fillText(arr[i], x + barWidth / 2, textY);
+      }
+    }
+
+    // --- Visualizer Initialization and Controls ---
+    function initVisualizer() {
+        if (!canvas) {
+            canvas = document.getElementById('sortingCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+            } else {
+                console.error("Canvas element not found in initVisualizer!");
+                return;
+            }
+        }
+        
+        resizeCanvas();
+        // If no array is loaded, provide a default one
+        if (arr.length === 0 || currentAlgoState.complete) { // Regenerate if array is empty or previous sort was completed
+            const defaultArray = generateRandomArray(20, 10, 100);
+            document.getElementById('array-input').value = defaultArray.join(',');
+            loadUserArray(); 
+        } else {
+            resetSort(); // Reset sorting state for existing array
+        }
+    }
+
+    // Function to resize canvas and redraw content
+    function resizeCanvas() {
+        if (canvas && canvas.parentElement) {
+            canvas.width = canvas.parentElement.offsetWidth; // Set canvas width to parent's width
+            canvas.height = 400; // Fixed height, but width is fluid
+            drawBars(); // Redraw bars after resizing
+        }
+    }
+
+    /**
+     * Generates a new array of random bar heights.
+     * @param {number} size - The number of elements in the array.
+     * @param {number} min - The minimum value for elements.
+     * @param {number} max - The maximum value for elements.
+     */
+    function generateRandomArray(size, min, max) {
+        
+        for (let i = 0; i < size; i++) { 
+            randomArr.push(Math.floor(Math.random() * (max - min + 1)) + min);
+        }
+        return randomArr;
+    }
+
+    /**
+     * Loads a given array into the global `arr` variable and resets the sorting state.
+     * @param {number[]} newArray - The array of numbers to load.
+     */
+    function loadArray(newArray) {
+        originalArray = [...newArray]; // Keep a copy for reset
+        arr = [...newArray];
+        maxVal = Math.max(...arr); // Update maxVal based on the new array
+        resetSort(); // Reset sort state whenever array changes
+        drawBars(); // Draw the newly loaded array
+    }
+
+    /**
+     * Parses user input from the array-input field and updates the visualization.
+     */
+    function loadUserArray() {
+        const inputString = document.getElementById('array-input').value;
+        const rawValues = inputString.split(',').map(s => s.trim()).filter(s => s !== ''); // Split, trim, filter empty
+
+        if (rawValues.length === 0) {
+            showCustomMessage("Please enter at least " + MIN_ARRAY_SIZE + " numbers.");
+            return;
+        }
+
+        const newArr = [];
+        let isValid = true;
+        for (const val of rawValues) {
+            const num = parseInt(val, 10);
+            if (isNaN(num) || num < 1 || num > 100) {
+                showCustomMessage("Invalid input: '" + val + "'. Please enter comma-separated numbers between 1 and 100.");
+                isValid = false;
+                break;
+            }
+            newArr.push(num);
+        }
+
+        if (!isValid) {
+            return; // Stop if validation failed
+        }
+
+        if (newArr.length < MIN_ARRAY_SIZE || newArr.length > MAX_ARRAY_SIZE) {
+            showCustomMessage("Please enter between " + MIN_ARRAY_SIZE + " and " + MAX_ARRAY_SIZE + " numbers.");
+            return;
+        }
+        
+        loadArray(newArr); // Load the user-defined array and reset sort state
+        showCustomMessage("Array loaded successfully!");
+    }
+
+    /**
+     * Resets the current sorting algorithm's state.
+     */
+    function resetSort() {
+        currentAlgoState = {
+            i: 0,
+            j: 0,
+            swapped: false,
+            complete: false,
+            sortedIndices: new Set(), // Always a Set
+            pivotIndex: -1,
+            // Algorithm-specific state properties initialized in visualizeStep functions
+        };
+        // Re-copy the original array to `arr` for a fresh start
+        arr = [...originalArray];
+
+        // Re-initialize algorithm-specific state based on currentAlgorithm key
+        if (currentAlgorithm) {
+            switch (currentAlgorithm) {
+                case 'merge':
+                    currentAlgoState.currentSize = 1;
+                    currentAlgoState.leftStart = 0;
+                    currentAlgoState.isMerging = false;
+                    currentAlgoState.temp = [];
+                    break;
+                case 'quick':
+                    currentAlgoState.stack = [{ low: 0, high: arr.length - 1 }];
+                    currentAlgoState.partitionState = null;
+                    break;
+                case 'heap':
+                    currentAlgoState.heapBuilt = false;
+                    currentAlgoState.heapSize = arr.length;
+                    currentAlgoState.i = Math.floor(arr.length / 2) - 1; // Start for build-heap
+                    break;
+                case 'counting':
+                    currentAlgoState.stage = 'counting';
+                    currentAlgoState.count = new Array(maxVal + 1).fill(0);
+                    currentAlgoState.output = new Array(arr.length).fill(0);
+                    currentAlgoState.i = 0;
+                    break;
+                case 'radix':
+                    currentAlgoState.stage = 'counting';
+                    currentAlgoState.exp = 1;
+                    currentAlgoState.i = 0;
+                    currentAlgoState.count = null; // Will be initialized in step
+                    currentAlgoState.output = null; // Will be initialized in step
+                    break;
+            }
+        }
+        
+        // Enable next step button and reset its text
+        const nextStepBtn = document.getElementById('next-step-btn');
+        if (nextStepBtn) {
+            nextStepBtn.textContent = 'Next Step';
+            nextStepBtn.disabled = false;
+        }
+        drawBars([], [], currentAlgoState.sortedIndices, -1); // Draw the array in its initial unsorted state
+    }
+
+    /**
+     * Executes one step of the currently selected sorting algorithm.
+     */
+    function nextStep() {
+        if (!currentAlgorithm || !algorithms[currentAlgorithm]?.visualizeStep) {
+            showCustomMessage("No visualization function defined for " + (algorithms[currentAlgorithm]?.name || "this algorithm") + ".");
+            return;
+        }
+
+        const nextStepBtn = document.getElementById('next-step-btn');
+        
+        if (currentAlgoState.complete) {
+            nextStepBtn.textContent = 'Sort Complete!';
+            nextStepBtn.disabled = true;
+            return;
+        }
+
+        // Call the specific visualizeStep function
+        algorithms[currentAlgorithm].visualizeStep();
+
+        if (currentAlgoState.complete) {
+            nextStepBtn.textContent = 'Sort Complete!';
+            nextStepBtn.disabled = true;
+            drawBars([], [], currentAlgoState.sortedIndices, -1); // Final draw with all elements sorted
+        }
+    }
+
+    // --- Sorting Algorithm Step-by-Step Visualizers ---
+
+    // Bubble Sort Step-by-Step Visualizer
+    function _bubbleSortNextStep() {
+        const n = arr.length;
+        let { i, j, swapped, sortedIndices } = currentAlgoState;
+
+        // Check if all passes are complete
+        if (i >= n - 1) { 
+            currentAlgoState.complete = true;
+            for (let k = 0; k < n; k++) sortedIndices.add(k); // Mark all as sorted
+            drawBars([], [], sortedIndices, -1);
+            return;
+        }
+
+        // Reset highlights for the current step
+        let compareIndices = [];
+        let swapIndices = [];
+
+        // Inner loop logic
+        if (j < n - i - 1) { 
+            compareIndices = [j, j + 1];
+            
+            if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // Swap
+                swapIndices = [j, j + 1];
+                swapped = true;
+            }
+            j++; // Move to the next comparison in inner loop
+        } else { // End of inner loop (finished one pass)
+            sortedIndices.add(n - 1 - i); // Mark the largest element of this pass as sorted
+
+            // Optimization: If no elements were swapped in the entire pass, array is sorted
+            if (!swapped) {
+                currentAlgoState.complete = true;
+                for (let k = 0; k < n; k++) sortedIndices.add(k); // Mark remaining as sorted
+                drawBars([], [], sortedIndices, -1);
+                return;
+            }
+            
+            i++; // Move to next pass
+            j = 0; // Reset inner loop counter
+            swapped = false; // Reset swapped flag for the new pass
+        }
+        
+        // Update state
+        currentAlgoState.i = i;
+        currentAlgoState.j = j;
+        currentAlgoState.swapped = swapped;
+        currentAlgoState.sortedIndices = sortedIndices;
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, sortedIndices, -1);
+    }
+
+    // Selection Sort Step-by-Step Visualizer
+    function _selectionSortNextStep() {
+        const n = arr.length;
+        let { i, j, minIndex, sortedIndices } = currentAlgoState;
+
+        // Initialize minIndex for the current pass
+        if (j === undefined || j >= n) { // If starting a new pass or inner loop finished
+            i++; // Move to the next position for the sorted section
+            if (i >= n - 1) { // Check if sorting is complete (last element will be sorted)
+                currentAlgoState.complete = true;
+                sortedIndices.add(n - 1);
+                drawBars([], [], sortedIndices, -1);
+                return;
+            }
+            minIndex = i; // Assume current `i` is the minimum initially
+            j = i + 1; // Start inner loop from next element
+        }
+
+        let compareIndices = [];
+        let swapIndices = [];
+        let highlightMinIndex = minIndex; // Index to highlight as current minimum
+
+        // Inner loop: find the minimum element in the unsorted part
+        if (j < n) {
+            compareIndices = [j, minIndex];
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+                highlightMinIndex = minIndex; // Update highlight if a new minimum is found
+            }
+            j++;
+        } else { // End of inner loop (finished finding min for current pass)
+            if (minIndex !== i) {
+                [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+                swapIndices = [i, minIndex];
+            }
+            sortedIndices.add(i); // Element at `i` is now in its correct sorted position
+            
+            // Prepare for next pass (handled by the outer `if (j === undefined || j >= n)` block)
+        }
+
+        // Update state
+        currentAlgoState.i = i;
+        currentAlgoState.j = j;
+        currentAlgoState.minIndex = minIndex;
+        currentAlgoState.sortedIndices = sortedIndices;
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, sortedIndices, highlightMinIndex);
+    }
+
+    // Insertion Sort Step-by-Step Visualizer
+    function _insertionSortNextStep() {
+        const n = arr.length;
+        let { i, j, key, sortedIndices } = currentAlgoState;
+
+        // Initialize state for the new element to insert
+        if (j === undefined || (j < 0 && i < n)) { // If starting a new outer loop iteration
+            i++; // Move to the next element to consider for insertion
+            if (i >= n) { // Check if sorting is complete
+                currentAlgoState.complete = true;
+                for (let k = 0; k < n; k++) sortedIndices.add(k);
+                drawBars([], [], sortedIndices, -1);
+                return;
+            }
+            key = arr[i]; // Get the element to be inserted
+            j = i - 1; // Start comparing from the end of the sorted part
+        }
+
+        let compareIndices = [];
+        let swapIndices = [];
+
+        // Inner loop: shift elements to the right to find the correct position for `key`
+        if (j >= 0 && arr[j] > key) {
+            compareIndices = [j, j + 1]; // Compare arr[j] with current key position (arr[j+1])
+            arr[j + 1] = arr[j]; // Shift element
+            swapIndices = [j + 1]; // Highlight where element moved from
+            j--;
+        } else { // Key's position found or all elements shifted, insert `key`
+            arr[j + 1] = key; // Insert the key
+            sortedIndices.add(j + 1); // Mark the newly inserted element as sorted
+
+            // Prepare for next outer loop iteration (handled by initial `if` block)
+            j = -1; // Indicate inner loop is done for this `i`
+        }
+
+        // Update state
+        currentAlgoState.i = i;
+        currentAlgoState.j = j;
+        currentAlgoState.key = key;
+        currentAlgoState.sortedIndices = sortedIndices;
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, sortedIndices, -1);
+    }
+
+    // Merge Sort (Iterative Bottom-Up with Detailed Steps)
+    function _mergeSortNextStep() {
+        let state = currentAlgoState;
+        let n = arr.length;
+
+        if (state.complete) {
+            nextStepBtn.disabled = true;
+            return;
+        }
+
+        // Reset highlights for the current step
+        let compareIndices = [];
+        let swapIndices = [];
+        let pivotIndex = -1; // Not used
+
+        // Phase: Setting up for a new merge operation (either a new segment or a new pass)
+        if (!state.isMerging) {
+            // Check if the entire array is sorted (currentSize has covered the whole array)
+            if (state.currentSize >= n) {
+                state.complete = true;
+                for (let idx = 0; idx < n; idx++) state.sortedIndices.add(idx);
+                drawBars([], [], state.sortedIndices, -1);
+                return;
+            }
+
+            // Check if all segments of `currentSize` have been processed in the current pass
+            if (state.leftStart >= n) {
+                state.currentSize *= 2; // Double the size for the next pass
+                state.leftStart = 0; // Reset `leftStart` for the new pass
+                // Recursively call `_mergeSortNextStep` to immediately start setting up the next pass/merge
+                _mergeSortNextStep(); 
+                return;
+            }
+
+            // Define the boundaries of the current two subarrays to be merged
+            state.leftHalfStart = state.leftStart;
+            state.mid = Math.min(state.leftHalfStart + state.currentSize - 1, n - 1);
+            state.rightHalfStart = Math.min(state.leftHalfStart + state.currentSize, n - 1);
+            state.currentMergeEnd = Math.min(state.leftHalfStart + 2 * state.currentSize - 1, n - 1);
+
+            // Copy the relevant segment of `arr` to a temporary array (`state.temp`) for merging
+            state.temp = [];
+            for (let idx = state.leftHalfStart; idx <= state.currentMergeEnd; idx++) {
+                state.temp.push(arr[idx]);
+            }
+
+            // Initialize pointers for the merge operation
+            state.i = 0; // Pointer for the left subarray within `state.temp`
+            state.j = (state.rightHalfStart - state.leftHalfStart); // Pointer for the right subarray within `state.temp`
+            state.k = state.leftHalfStart; // Pointer for writing back to the main `arr`
+
+            state.isMerging = true; // Set flag to indicate we are now in the merging phase
+
+            // Highlight the entire segment that is about to be merged
+            for(let idx = state.leftHalfStart; idx <= state.currentMergeEnd; idx++) {
+                compareIndices.push(idx);
+            }
+            drawBars(compareIndices, swapIndices, state.sortedIndices, -1);
+            return; // Draw setup and wait for the next click to start merging steps
+        } 
+        // Phase: Performing one step of the actual merge operation
+        else {
+            // Calculate effective lengths of the left and right halves within `state.temp`
+            const l_len_in_temp = state.mid - state.leftHalfStart + 1;
+            const r_len_in_temp = state.currentMergeEnd - state.rightHalfStart + 1;
+
+            // Compare elements from both halves and place the smaller one into `arr`
+            if (state.i < l_len_in_temp && state.j < r_len_in_temp) {
+                compareIndices = [state.leftHalfStart + state.i, state.rightHalfStart + state.j]; // Highlight elements being compared in original array positions
+                if (state.temp[state.i] <= state.temp[state.j]) {
+                    arr[state.k] = state.temp[state.i];
+                    state.i++;
+                } else {
+                    arr[state.k] = state.temp[state.j];
+                    state.j++;
+                }
+                swapIndices.push(state.k); // Highlight the position in `arr` where the element is placed
+                state.k++; // Advance write pointer in `arr`
+            } 
+            // If only elements from the left half remain in `state.temp`
+            else if (state.i < l_len_in_temp) {
+                arr[state.k] = state.temp[state.i];
+                swapIndices.push(state.k);
+                compareIndices.push(state.leftHalfStart + state.i); // Highlight element being copied
+                state.i++;
+                state.k++;
+            } 
+            // If only elements from the right half remain in `state.temp`
+            else if (state.j < r_len_in_temp) {
+                arr[state.k] = state.temp[state.j];
+                swapIndices.push(state.k);
+                compareIndices.push(state.rightHalfStart + state.j); // Highlight element being copied
+                state.j++;
+                state.k++;
+            } 
+            // The current merge operation is complete
+            else {
+                state.isMerging = false; // Exit merging phase
+                state.leftStart = state.currentMergeEnd + 1; // Move to the start of the next segment for the current pass
+                
+                // Mark the just-merged segment as sorted for this specific pass
+                // Note: these elements are only truly sorted if `currentSize` equals `n`
+                // For intermediate merges, they are sorted relative to their sub-segment.
+                // We'll only add to `state.sortedIndices` at the very end when `state.complete` is true.
+                
+                // Immediately call `_mergeSortNextStep` to either set up the next merge or transition to the next pass
+                _mergeSortNextStep(); 
+                return; // Return to prevent drawing twice in one tick
+            }
+        }
+        drawBars(compareIndices, swapIndices, state.sortedIndices, -1);
+    }
+
+    // Quick Sort (using an explicit stack to simulate recursion)
+    function _quickSortNextStep() {
+        let state = currentAlgoState;
+        let n = arr.length;
+
+        if (state.complete) {
+            nextStepBtn.disabled = true;
+            return;
+        }
+
+        // Reset highlights for the current step
+        let compareIndices = [];
+        let swapIndices = [];
+        let pivotIndex = -1;
+
+        // If no active partition is being processed, pop one from the stack
+        if (!state.partitionState) {
+            if (state.stack.length === 0) { // If stack is empty, sorting is complete
+                state.complete = true;
+                for (let k = 0; k < n; k++) state.sortedIndices.add(k); // Mark all as sorted
+                drawBars([], [], state.sortedIndices, -1);
+                return;
+            }
+            
+            // Pop the next partition range from the stack
+            const { low, high } = state.stack.pop();
+
+            // Base case for recursion: 0 or 1 element subarray is considered sorted
+            if (low >= high) { 
+                state.sortedIndices.add(low); // Mark single element as sorted
+                // Immediately call `_quickSortNextStep` to process the next partition or finish
+                _quickSortNextStep(); 
+                return;
+            }
+
+            // Initialize partition state for the new segment
+            state.partitionState = {
+                low: low,
+                high: high,
+                pivotValue: arr[high], // Choose last element as pivot (Lomuto partition)
+                i: low - 1, // Pointer for elements smaller than pivot
+                j: low,     // Pointer for scanning elements
+                phase: 'scanning' // 'scanning', 'placingPivot', 'pushingSubarrays'
+            };
+            pivotIndex = high; // Highlight the pivot for the setup
+            drawBars([], [], state.sortedIndices, pivotIndex); // Draw initial state of this partition
+            return; // Wait for next click to start scanning
+        }
+
+        // Process current active partition
+        let { low, high, pivotValue, i, j, phase } = state.partitionState;
+        pivotIndex = high; // Always highlight the current pivot
+
+        // Phase 1: Scanning elements and swapping those smaller than the pivot
+        if (phase === 'scanning') {
+            if (j < high) { // Still scanning within the partition
+                compareIndices = [j, high]; // Compare current element with pivot
+                if (arr[j] < pivotValue) {
+                    i++;
+                    if (i !== j) { // Only swap if `i` and `j` are different
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                        swapIndices = [i, j];
+                    }
+                }
+                state.partitionState.i = i; // Update `i` in state
+                state.partitionState.j = j + 1; // Advance `j` (scanner)
+            } else { // End of scanning for current partition
+                state.partitionState.phase = 'placingPivot'; // Move to placing pivot
+                // Immediately call `_quickSortNextStep` to place the pivot
+                _quickSortNextStep(); 
+                return; // Return to prevent drawing twice
+            }
+        }
+        // Phase 2: Place the pivot in its correct sorted position
+        else if (phase === 'placingPivot') {
+            i++;
+            if (i !== high) { // Only swap if pivot isn't already in its final place
+                [arr[i], arr[high]] = [arr[high], arr[i]];
+                swapIndices = [i, high];
+            }
+            pivotIndex = i; // The pivot's final position in this partition
+            state.sortedIndices.add(pivotIndex); // Mark pivot as sorted
+            state.partitionState.pivotFinalIndex = pivotIndex; // Store pivot's final index
+
+            state.partitionState.phase = 'pushingSubarrays'; // Move to adding sub-partitions
+            // Immediately call `_quickSortNextStep` to push sub-partitions
+            _quickSortNextStep(); 
+            return; // Return to prevent drawing twice
+        }
+        // Phase 3: Add sub-partitions to the stack and clean up
+        else if (phase === 'pushingSubarrays') {
+            const pivotFinalIndex = state.partitionState.pivotFinalIndex;
+            // Push left sub-array range to stack if it exists
+            if (low < pivotFinalIndex - 1) { 
+                state.stack.push({ low: low, high: pivotFinalIndex - 1 });
+            }
+            // Push right sub-array range to stack if it exists
+            if (pivotFinalIndex + 1 < high) { 
+                state.stack.push({ low: pivotFinalIndex + 1, high: high });
+            }
+            
+            state.partitionState = null; // Mark current partition as complete
+            // Immediately call `_quickSortNextStep` to process the next partition or finish
+            _quickSortNextStep(); 
+            return; // Return to prevent drawing twice
+        }
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, state.sortedIndices, pivotIndex);
+    }
+
+    // Heap Sort Step-by-Step Visualizer
+    function _heapSortNextStep() {
+        let state = currentAlgoState;
+        let n = arr.length; // Max size of the array
+        let currentHeapSize = state.heapSize; // Current size of the heap being manipulated
+
+        if (state.complete) {
+            nextStepBtn.disabled = true;
+            return;
+        }
+
+        // Reset highlights for the current step
+        let compareIndices = [];
+        let swapIndices = [];
+        let pivotIndex = -1; // Not used as a pivot in the same way as QuickSort
+
+        // Stage 1: Building the Max-Heap (initial phase)
+        if (!state.heapBuilt) {
+            if (state.i >= 0) { // Iterate from last non-leaf node up to root (floor(n/2)-1 down to 0)
+                // Perform one heapify step from `state.i`
+                _performHeapifyStep(state, n, state.i, compareIndices, swapIndices); 
+                state.i--; // Move to the previous node
+            } else { // Heap building is complete
+                state.heapBuilt = true;
+                state.i = n - 1; // Reset `i` to the last element for the extraction phase
+                showCustomMessage("Heap is built. Now extracting the maximum element one by one.");
+            }
+        } 
+        // Stage 2: Extracting maximum elements and sorting
+        else {
+            if (state.i > 0) { // While there are elements in the heap to extract
+                // Swap the root (largest element) with the current last element of the heap
+                compareIndices = [0, state.i];
+                swapIndices = [0, state.i];
+                [arr[0], arr[state.i]] = [arr[state.i], arr[0]];
+                
+                state.sortedIndices.add(state.i); // The swapped element is now in its final sorted position
+                currentHeapSize--; // Reduce the effective heap size
+                state.i--; // Move to the next last element
+                
+                // Perform one heapify step on the reduced heap to restore max-heap property
+                _performHeapifyStep(state, currentHeapSize, 0, compareIndices, swapIndices); // Heapify from the new root (index 0)
+            } else { // All elements extracted and sorted
+                state.complete = true;
+                state.sortedIndices.add(0); // Mark the very last element (which is now at index 0) as sorted
+                nextStepBtn.disabled = true;
+                showCustomMessage("Sorting finished!");
+            }
+        }
+        // Update heapSize in state
+        currentAlgoState.heapSize = currentHeapSize; 
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, state.sortedIndices, pivotIndex);
+    }
+    
+    // Helper function for Heapify step (used by Heap Sort)
+    function _performHeapifyStep(state, heapSize, rootIndex, compareIndices, swapIndices) {
+        let largest = rootIndex; // Initialize `largest` as the current `rootIndex`
+        let leftChild = 2 * rootIndex + 1; // Calculate left child index
+        let rightChild = 2 * rootIndex + 2; // Calculate right child index
+        
+        // Add current root to comparisons
+        if (!compareIndices.includes(rootIndex)) compareIndices.push(rootIndex);
+        if(leftChild < heapSize && !compareIndices.includes(leftChild)) compareIndices.push(leftChild);
+        if(rightChild < heapSize && !compareIndices.includes(rightChild)) compareIndices.push(rightChild);
+
+        // If left child exists and is larger than `largest` so far
+        if (leftChild < heapSize && arr[leftChild] > arr[largest]) {
+            largest = leftChild;
+        }
+
+        // If right child exists and is larger than `largest` so far
+        if (rightChild < heapSize && arr[rightChild] > arr[largest]) {
+            largest = rightChild;
+        }
+
+        // If `largest` is not the `rootIndex`, a swap is needed
+        if (largest !== rootIndex) {
+            [arr[rootIndex], arr[largest]] = [arr[largest], arr[rootIndex]]; // Swap elements
+            swapIndices.push(rootIndex, largest); // Highlight swapped positions
+            // Recursively call heapify on the affected subtree (to fix max-heap property down the tree)
+            // Note: For visualization, we'll let the next `nextStep` call handle this "recursive" part.
+            // This simplification makes the step-by-step clearer.
+        }
+    }
+
+    // Counting Sort Step-by-Step Visualizer
+    function _countingSortNextStep() {
+        const n = arr.length;
+        let { stage, count, output, i, max, sortedIndices } = currentAlgoState;
+
+        // Initialize state if needed (on first step or after reset)
+        if (stage === undefined) {
+            max = Math.max(...originalArray); // Max value in the original array
+            count = new Array(max + 1).fill(0); // Initialize count array with zeros
+            output = new Array(n); // Initialize output array
+            stage = 'counting'; // Start with the counting phase
+            i = 0; // Index for iteration
+            currentAlgoState = { stage, count, output, i, max, sortedIndices: new Set() };
+        }
+
+        // Reset highlights for the current step
+        let compareIndices = [];
+        let swapIndices = [];
+
+        // Stage 1: Counting occurrences of each element
+        if (stage === 'counting') {
+            if (i < n) { // Iterate through the original array
+                count[originalArray[i]]++; // Increment count for the current element's value
+                compareIndices.push(i); // Highlight the element being counted
+                i++; // Move to the next element in original array
+            } else { // All elements counted
+                // Convert count to cumulative count (prefix sum)
+                for (let j = 1; j <= max; j++) {
+                    count[j] += count[j - 1];
+                }
+                stage = 'placing'; // Move to next stage: Building Output Array
+                i = n - 1; // Start from the end of the original array for stability
+                showCustomMessage("Counting complete. Now building the output array.");
+            }
+        } 
+        // Stage 2: Building the sorted Output Array
+        else if (stage === 'placing') {
+            if (i >= 0) { // Iterate backwards through the original array for stability
+                const value = originalArray[i]; // Get value from original (unsorted) array
+                const position = count[value] - 1; // Calculate final position in output array
+                output[position] = value; // Place element in output array
+                count[value]--; // Decrement count for this value (important for duplicates and stability)
+                
+                arr = [...output]; // Update global `arr` for visualization
+                sortedIndices.add(position); // Mark its final position as sorted
+                
+                compareIndices.push(i); // Highlight element from original array being processed
+                swapIndices.push(position); // Highlight its destination in output array
+                
+                i--; // Move to previous element in original array
+            } else { // All elements placed in output array
+                state.complete = true;
+                for (let k = 0; k < n; k++) sortedIndices.add(k); // Ensure all are marked sorted
+                drawBars([], [], sortedIndices, -1);
+                showCustomMessage("Sorting finished!");
+                return;
+            }
+        }
+
+        // Update state
+        currentAlgoState.stage = stage;
+        currentAlgoState.count = count;
+        currentAlgoState.output = output;
+        currentAlgoState.i = i;
+        currentAlgoState.sortedIndices = sortedIndices;
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, sortedIndices, -1);
+    }
+
+    // Radix Sort Step-by-Step Visualizer
+    function _radixSortNextStep() {
+        const n = arr.length;
+        let { stage, exp, output, count, i, max, sortedIndices } = currentAlgoState;
+
+        // Initialize state if needed (on first step or after reset)
+        if (stage === undefined) {
+            max = Math.max(...originalArray); // Find maximum value to determine number of passes
+            exp = 1; // Start with the units place (10^0)
+            stage = 'counting'; // Initial phase: counting
+            i = 0; // Index for iteration
+            currentAlgoState = { stage, exp, output: null, count: null, i, max, sortedIndices: new Set() };
+        }
+
+        // Check if all passes are complete (exp > max means all digits have been processed)
+        if (exp > max) {
+            state.complete = true;
+            for (let k = 0; k < n; k++) sortedIndices.add(k); // Mark all as finally sorted
+            drawBars([], [], sortedIndices, -1); // Final draw
+            showCustomMessage("Sorting finished!");
+            return;
+        }
+        
+        // Reset highlights for the current step (for each new pass/digit)
+        let compareIndices = [];
+        let swapIndices = [];
+
+        // Stage 1: Counting occurrences for the current digit place (similar to Counting Sort's first stage)
+        if (stage === 'counting') {
+            if (!count) { // Initialize `count` array for each new pass
+                count = new Array(10).fill(0); // Digits 0-9
+                currentAlgoState.count = count;
+            }
+            
+            if (i < n) { // Iterate through the current `arr` (which holds result of previous pass)
+                const digit = Math.floor((arr[i] / exp) % 10); // Extract the current digit
+                count[digit]++; // Increment count for this digit
+                compareIndices.push(i); // Highlight the element being counted
+                i++; // Move to next element
+            } else { // All elements counted for this digit
+                // Convert count to cumulative count (prefix sum)
+                for (let j = 1; j < 10; j++) {
+                    count[j] += count[j - 1];
+                }
+                output = new Array(n); // Initialize output array for this pass
+                stage = 'placing'; // Move to next stage: Building Output Array
+                i = n - 1; // Start from the end of the array for stability
+            }
+        } 
+        // Stage 2: Building the output array for the current digit pass
+        else if (stage === 'placing') {
+            if (i >= 0) { // Iterate backwards through the array (stable placement)
+                const value = arr[i]; // Get value from the current `arr` (sorted by previous digit)
+                const digit = Math.floor((value / exp) % 10);
+                const position = count[digit] - 1; // Calculate final position based on cumulative count
+                output[position] = value; // Place element in output array
+                count[digit]--; // Decrement count
+                
+                compareIndices.push(i); // Highlight element being processed
+                swapIndices.push(position); // Highlight its destination
+                
+                i--; // Move to previous element
+            } else { // All elements placed in `output` array for this digit pass
+                // Prepare for the next digit pass
+                exp *= 10; // Move to the next digit place (tens, hundreds, etc.)
+                stage = 'counting'; // Reset stage to start new counting pass
+                i = 0; // Reset index for new counting pass
+                arr = [...output]; // Update the global `arr` with the sorted output for this digit
+                count = null; // Clear count array (will be re-initialized in next pass)
+                output = null; // Clear output array (will be re-initialized in next pass)
+                showCustomMessage(`Pass for ${exp/10}s digit complete. Starting pass for ${exp}s digit.`);
+            }
+        }
+
+        // Update state
+        currentAlgoState.stage = stage;
+        currentAlgoState.exp = exp;
+        currentAlgoState.output = output;
+        currentAlgoState.count = count;
+        currentAlgoState.i = i;
+        currentAlgoState.sortedIndices = sortedIndices; // `sortedIndices` only populated at end of Radix sort
+
+        // Draw the current state
+        drawBars(compareIndices, swapIndices, sortedIndices, -1);
+    }
+
+    // --- Page Navigation and Tab Functionality ---
+    document.getElementById('visualizer-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelector('.hero').style.display = 'none';
+      document.querySelector('.features').style.display = 'none';
+      document.getElementById('visualization-page').style.display = 'block';
+      document.querySelector('.header').style.background = 'var(--primary)';
+      window.scrollTo(0, 0);
+    });
+    
+    document.getElementById('back-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelector('.hero').style.display = 'block';
+      document.querySelector('.features').style.display = 'block';
+      document.getElementById('visualization-page').style.display = 'none';
+      document.getElementById('algorithm-page').style.display = 'none';
+      document.querySelector('.header').style.background = 'var(--header-gradient)';
+      // Stop sorting when leaving the algorithm page
+      resetSort(); // Reset sort state
+      window.scrollTo(0, 0);
+    });
+    
+    document.getElementById('back-to-list').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('algorithm-page').style.display = 'none';
+      document.getElementById('visualization-page').style.display = 'block';
+      // Stop sorting when leaving the algorithm detail page back to list
+      resetSort(); // Reset sort state
+      window.scrollTo(0, 0);
+    });
+
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    function showTab(tabId) {
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        tabButtons.forEach(button => {
+            button.classList.remove('active');
+        });
+
+        const targetTabContent = document.getElementById(tabId + '-tab-content');
+        const targetTabButton = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
+
+        if (targetTabContent) {
+            targetTabContent.classList.add('active');
+        }
+        if (targetTabButton) {
+            targetTabButton.classList.add('active');
+        }
+
+        // If 'Try This Algorithm' tab is shown, ensure visualizer is initialized
+        if (tabId === 'try') {
+            initVisualizer();
+        } else {
+            // If switching away from try tab, stop any ongoing sorts
+            resetSort();
+        }
+        // After switching tabs, trigger MathJax re-render for new content
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            showTab(tabId);
+        });
+    });
+
+    // Learn More button functionality
+    document.querySelectorAll('.learn-more').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const algoType = this.getAttribute('data-algo');
+        currentAlgorithm = algoType; // Set the current algorithm type
+        const algo = algorithms[algoType];
+        
+        // Update algorithm page content for each tab
+        document.getElementById('algo-title').textContent = algo.name;
+        
+        // Definition Tab Content
+        document.getElementById('algo-definition').textContent = algo.definition;
+        document.getElementById('algo-best-case').textContent = algo.bestCase;
+        document.getElementById('algo-average-case').textContent = algo.averageCase;
+        document.getElementById('algo-worst-case').textContent = algo.worstCase;
+        document.getElementById('algo-example').innerHTML = algo.example.replace(/\n/g, '<br>');
+        
+        // Algorithm Tab Content
+        document.getElementById('algo-pseudocode').textContent = algo.pseudocode;
+        
+        // Video Tab Content
+        const videoContainer = document.getElementById('algo-video');
+        if (videoContainer) { 
+          videoContainer.innerHTML = `
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/${algo.videoId}" 
+            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen></iframe>
+          `;
+        }
+        
+        // Update description for the Try Algo tab
+        const tryAlgoDescription = document.getElementById('try-algo-description');
+        if (tryAlgoDescription) { 
+            tryAlgoDescription.textContent = `Visualize how ${algo.name} works with interactive examples. Click 'Next Step' to see each operation.`;
+        }
+
+        // The 'try-algorithm' button now just switches to the 'try' tab.
+        const tryAlgorithmButton = document.getElementById('try-algorithm');
+        if (tryAlgorithmButton) { 
+            tryAlgorithmButton.onclick = function(e) {
+                e.preventDefault();
+                showTab('try'); 
+            };
+        }
+        
+        // Show algorithm page
+        document.querySelector('.hero').style.display = 'none';
+        document.querySelector('.features').style.display = 'none';
+        document.getElementById('visualization-page').style.display = 'none';
+        document.getElementById('algorithm-page').style.display = 'block';
+        document.querySelector('.header').style.background = 'var(--primary)';
+        
+        // Activate the first tab (Definition) by default when a new algorithm is loaded
+        showTab('definition'); 
+
+        window.scrollTo(0, 0);
+      });
+    });
+
+    // Custom message box function (replaces browser's alert())
+    function showCustomMessage(message, buttonText = 'OK', callback = () => {}) {
+      const messageBox = document.createElement('div');
+      messageBox.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1000;
+        text-align: center;
+        border: 2px solid var(--primary);
+      `;
+      messageBox.innerHTML = `
+        <p>${message}</p>
+        <button style="margin-top: 15px; padding: 8px 15px; background-color: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">${buttonText}</button>
+      `;
+      document.body.appendChild(messageBox);
+
+      messageBox.querySelector('button').addEventListener('click', () => {
+        document.body.removeChild(messageBox);
+        callback();
+      });
+    }
+
+    // Override alert to use custom message box
+    window.alert = showCustomMessage;
+
+    // --- Attach Visualizer Control Event Listeners ONCE when DOM is fully loaded ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial MathJax render for elements visible on load
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+
+        const nextStepBtn = document.getElementById('next-step-btn'); 
+        const resetSortBtn = document.getElementById('reset-sort-btn'); 
+        const loadArrayBtn = document.getElementById('load-array-btn'); 
+        const arrayInput = document.getElementById('array-input'); 
+
+        if (nextStepBtn) {
+            nextStepBtn.onclick = () => {
+                if (arr.length === 0) {
+                    showCustomMessage("Please load an array first!"); // Updated message
+                    return;
+                }
+                nextStep(); // Execute one step
+            };
+        }
+
+        if (resetSortBtn) { 
+            resetSortBtn.onclick = () => {
+                resetSort();
+                drawBars(); // Redraw current array without highlights
+                showCustomMessage("Sort state reset. Click 'Next Step' to start again.");
+            };
+        }
+
+        if (loadArrayBtn) {
+            loadArrayBtn.onclick = loadUserArray; 
+        }
+
+        // Initialize canvas sizing on load (important for initial display)
+        window.addEventListener('resize', resizeCanvas); // Make canvas responsive
+        resizeCanvas(); 
+
+        // Initial setup for the visualizer to show a default array
+        const defaultArray = generateRandomArray(20, 10, 100);
+        document.getElementById('array-input').value = defaultArray.join(',');
+        loadArray(defaultArray); // Load initial array
+        currentAlgorithm = 'bubble'; // Set default algorithm
+        resetSort(); // Initialize state for the default algorithm
+    });
+
+  </script>
+</body>
+</html>
